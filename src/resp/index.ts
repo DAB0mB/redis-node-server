@@ -1,3 +1,3 @@
-import { parseMessage, Message } from './resp';
+import { parse, stringify, Message } from './resp';
 
-export { parseMessage, Message };
+export { parse, stringify, Message };

@@ -4,7 +4,7 @@ const CR = '\r';
 const LF = '\n';
 const CRLF = `${CR}${LF}`;
 
-export type Message = string | number | Error | Message[];
+export type Message = string | number | Error | String | Message[];
 
 class MessageParser {
   private cursor: Cursor;
@@ -14,25 +14,25 @@ class MessageParser {
   }
 
   parse(): Message {
-    const slice = this.cursor.next(1);
-    if (slice == null) {
-      throw new Error(`RESP: message was already parsed`);
+    const messageType = this.cursor.next(1);
+    if (messageType == null) {
+      throw new Error(`Message was already parsed`);
     }
 
-    switch (slice) {
+    switch (messageType) {
       case '+': return this.parseSimpleString();
       case '-': return this.parseError();
       case ':': return this.parseInteger();
       case '$': return this.parseBulkString();
       case '*': return this.parseArray();
     }
-    throw new Error(`RESP: unrecognized data type "${slice}" at ${this.cursor.ln}:${this.cursor.col}`);
+    throw new Error(`Unknown message type "${messageType}" at ${this.cursor.ln}:${this.cursor.col}`);
   }
 
   private parseSimpleString() {
     let c = this.cursor.next(1);
     let message = '';
-    while (c != null && c != CRLF && c != LF) {
+    while (c != null && c != CRLF) {
       message += c;
       c = this.cursor.next(1);
     }
@@ -56,7 +56,7 @@ class MessageParser {
     if (message == null) return '';
     // CRLF
     this.cursor.next(1);
-    return message;
+    return new String(message);
   }
 
   private parseArray() {
@@ -66,6 +66,65 @@ class MessageParser {
       messages.push(this.parse());
     }
     return messages;
+  }
+}
+
+class MessageStringifier {
+  constructor() {
+  }
+
+  stringify(message: Message): string {
+    if (message instanceof Array) {
+      return this.stringifyArray(message);
+    }
+    if (message instanceof Error) {
+      return this.stringifyError(message);
+    }
+    if (message instanceof String) {
+      return this.stringifyBulkString(message);
+    }
+    if (typeof message == 'string') {
+      return this.stringifySimpleString(message);
+    }
+    if (typeof message == 'number') {
+      return this.stringifyInteger(message);
+    }
+    if (message === null) {
+      return this.stringifyNull();
+    }
+    throw new Error(`Unknown message type: ${message}`);
+  }
+
+  private stringifyArray(message: Message[]) {
+    return `*${message.length}${CRLF}` + message.map(m => this.stringify(m)).join('');
+  }
+
+  private stringifyError(message: Error) {
+    return `-${message.message}${CRLF}`;
+  }
+
+  private stringifyBulkString(message: String) {
+    return `$${message.length}${CRLF}${message}${CRLF}`;
+  }
+
+  private stringifySimpleString(message: string) {
+    for (let i = 0; i < message.length - 1; i++) {
+      if (message[i] == CR && message[i + 1] == LF) {
+        throw new Error(`Message is not string safe: "${message}"`)
+      } 
+    }
+    return `+${message}${CRLF}`;
+  }
+
+  private stringifyInteger(message: number) {
+    if (message % 1 != 0) {
+      throw new Error(`Message is not an integer: ${message}`);
+    }
+    return `:${message}${CRLF}`;
+  }
+
+  private stringifyNull() {
+    return `$-1${CRLF}`;
   }
 }
 
@@ -119,6 +178,10 @@ class Cursor {
   }
 }
 
-export function parseMessage(message: string) {
-  return new MessageParser(message).parse();
+export function parse(text: string) {
+  return new MessageParser(text).parse();
+}
+
+export function stringify(message: Message) {
+  return new MessageStringifier().stringify(message);
 }

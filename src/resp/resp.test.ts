@@ -1,6 +1,11 @@
+import { describe, expect, test } from '@jest/globals';
 import * as fs from 'fs';
-import * as resp from './resp';
+import * as RESP from './resp';
 
-const testData = fs.readFileSync(require.resolve('./docs.resp')).toString();
-
-console.log(resp.parseMessage(testData));
+describe('resp', () => {
+  test('parse followed by stringify yields the original value', () => {
+    const docsResp = fs.readFileSync(require.resolve('./docs.resp')).toString();
+    const docs = RESP.parse(docsResp);
+    expect(RESP.stringify(docs)).toEqual(docsResp);
+  });
+});
