@@ -131,7 +131,7 @@ class MessageStringifier {
 export class RawMessage {
   constructor(private text: string) {
     // Validate
-    parse(text);
+    parseMessage(text);
   }
 
   valueOf() {
@@ -193,10 +193,10 @@ class Cursor {
   }
 }
 
-export function parse(text: string | RawMessage) {
+export function parseMessage(text: string | RawMessage) {
   return new MessageParser(text).parse();
 }
 
-export function stringify(message: Message) {
+export function stringifyMessage(message: Message) {
   return new MessageStringifier().stringify(message);
 }

@@ -1,10 +1,10 @@
 import { describe, expect, test } from '@jest/globals';
 import docsResp from './docs';
-import * as RESP from '.';
+import { parseMessage, stringifyMessage } from '.';
 
 describe('resp', () => {
   test('parse followed by stringify yields the original value', () => {
-    const docs = RESP.parse(docsResp);
-    expect(RESP.stringify(docs)).toEqual(docsResp.toString());
+    const docs = parseMessage(docsResp);
+    expect(stringifyMessage(docs)).toEqual(docsResp.toString());
   });
 });
