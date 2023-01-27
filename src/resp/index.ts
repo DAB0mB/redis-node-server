@@ -180,7 +180,7 @@ class Cursor {
         i++;
         this.end++;
       }
-      if (c == CRLF || c == LF) {
+      if (c == CRLF) {
         this.#ln++;
         this.#col = 1;
       }
