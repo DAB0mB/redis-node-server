@@ -18,7 +18,7 @@ const server = net.createServer((socket) => {
       if (!command) {
         throw new UnknownCommandError(commandName);
       }
-      const remoteMessage = await command(args);
+      const remoteMessage = await command(args, socket);
       if (remoteMessage instanceof RawMessage) {
         socket.write(remoteMessage.toString());
       }
