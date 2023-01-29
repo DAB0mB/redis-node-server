@@ -1,8 +1,6 @@
-import { assertGet } from 'src/assert';
-import { Message } from 'src/resp';
-import store from 'src/store';
+import { store } from 'src/store';
 
-export function del(message: Message[]) {
-  const key = assertGet(message[0], String).toString();
+export function del(args: String[]) {
+  const key = args[0].toLowerCase();
   return store.delete(key) ? 1 : 0;
 };

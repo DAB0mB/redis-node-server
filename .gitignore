@@ -1,5 +1,7 @@
 # Logs
 *.log
+# Dump
+dump.json
 # API keys and secrets
 .env
 # Dependency directory

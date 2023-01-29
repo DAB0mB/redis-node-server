@@ -1,10 +1,10 @@
-import { assertGet } from 'src/assert';
 import { Message } from 'src/resp';
-import store from 'src/store';
+import { store } from 'src/store';
+import { kValue } from 'src/store/keys';
 
-export function set(message: Message[]) {
-  const key = assertGet(message[0], String).toString();
-  const value = assertGet(message[1], String).toString();
-  store.set(key, value);
+export function set(args: Message[]) {
+  const key = args[0].toString();
+  const value = args[1];
+  store.set(key, kValue, value);
   return 'OK';
 };

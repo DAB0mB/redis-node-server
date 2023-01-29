@@ -10,7 +10,7 @@ class MessageParser {
   private cursor: Cursor;
 
   constructor(text: string | RawMessage) {
-    this.cursor = new Cursor(text.valueOf());
+    this.cursor = new Cursor(text.toString());
   }
 
   parse(): Message {
@@ -108,10 +108,8 @@ class MessageStringifier {
   }
 
   private stringifySimpleString(message: string) {
-    for (let i = 0; i < message.length - 1; i++) {
-      if (message[i] == CR && message[i + 1] == LF) {
-        throw new Error(`Message is not string safe: "${message}"`)
-      } 
+    if (message.indexOf(CRLF) != -1) {
+      throw new Error(`Message is not a safe string: "${message}"`)
     }
     return `+${message}${CRLF}`;
   }

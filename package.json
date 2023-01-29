@@ -1,5 +1,5 @@
 {
-  "name": "redis-clone",
+  "name": "redis-node-server",
   "private": true,
   "devDependencies": {
     "@jest/globals": "^29.4.1",

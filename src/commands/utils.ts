@@ -1,6 +1,6 @@
 import { Message, RawMessage } from 'src/resp';
 
 export type Command = {
-  (message: Message[]): Message | RawMessage,
+  (args: String[]): Message | RawMessage,
   name: string,
 };
