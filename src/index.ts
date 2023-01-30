@@ -1,7 +1,8 @@
 import * as net from 'net';
-import { commands } from './commands';
-import { UnknownCommandError } from './errors';
 import { assertGet } from './assert';
+import { commands } from './commands';
+import { Command } from './commands/utils';
+import { UnknownCommandError } from './errors';
 import { RawMessage, parseMessage, stringifyMessage } from './resp';
 import { store } from './store';
 
@@ -13,11 +14,17 @@ const server = net.createServer((socket) => {
     try {
       const localMessage = assertGet(parseMessage(data.toString()), Array);
       const args = localMessage.map(m => assertGet(m, String));
-      const commandName = args.shift().toLowerCase();
-      const command = commands.get(commandName);
-      if (!command) {
-        throw new UnknownCommandError(commandName);
-      }
+      let subCommands = commands;
+      let commandName: string;
+      let command: Command;
+      do {
+        commandName = args.shift().toLowerCase();
+        command = subCommands[commandName];
+        if (!command) {
+          throw new UnknownCommandError(commandName);
+        }
+        subCommands = command.subCommands;
+      } while (subCommands && args.length);
       const remoteMessage = await command(args, socket);
       if (remoteMessage instanceof RawMessage) {
         socket.write(remoteMessage.toString());

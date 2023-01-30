@@ -11,15 +11,16 @@ import { ttl } from './ttl';
 import { unsubscribe } from './unsubscribe';
 import { Command } from './utils';
 
-export const commands = new Map<string, Command>();
-commands.set(command.name, command);
-commands.set(del.name, del);
-commands.set(expire.name, expire);
-commands.set(get.name, get);
-commands.set(persist.name, persist);
-commands.set(publish.name, publish);
-commands.set(save.name, save);
-commands.set(set.name, set);
-commands.set(subscribe.name, subscribe);
-commands.set(ttl.name, ttl);
-commands.set(unsubscribe.name, unsubscribe);
+export const commands: Record<string, Command> = {
+  command,
+  del,
+  expire,
+  get,
+  persist,
+  publish,
+  save,
+  set,
+  subscribe,
+  ttl,
+  unsubscribe,
+};

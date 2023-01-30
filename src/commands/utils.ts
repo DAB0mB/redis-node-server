@@ -3,5 +3,5 @@ import { Message, RawMessage } from 'src/resp';
 
 export type Command = {
   (args: String[], socket: Socket): Message | RawMessage | Promise<Message | RawMessage>,
-  name: string,
+  subCommands?: Record<string, Command>,
 };
