@@ -3,20 +3,27 @@ import { Store } from './store';
 
 export class Invalidator {
   private timeouts = new Map<string, NodeJS.Timeout>();
+  private watching = false;
 
   constructor(readonly store: Store) {
   }
 
   watch() {
+    if (this.watching) return false;
+    this.watching = true;
     this.store.events.on(`set:${kExpiresAt}`, this.onSetExpiresAt);
     this.store.events.on(`delete:${kExpiresAt}`, this.onDeleteExpiresAt);
     this.store.events.on(`delete`, this.onDeleteExpiresAt);
+    return true;
   }
 
   unwatch() {
+    if (!this.watching) return false;
+    this.watching = false;
     this.store.events.off(`set:${kExpiresAt}`, this.onSetExpiresAt);
     this.store.events.off(`delete:${kExpiresAt}`, this.onDeleteExpiresAt);
     this.store.events.off(`delete`, this.onDeleteExpiresAt);
+    return true;
   }
 
   private onSetExpiresAt = (key: string, expiresAt: number) => {

@@ -2,11 +2,11 @@ import * as net from 'net';
 import { assertGet } from './assert';
 import { commands } from './commands';
 import { Command } from './commands/utils';
+import { error, log } from './console';
 import { UnknownCommandError } from './errors';
+import { call } from './functions';
 import { RawMessage, parseMessage, stringifyMessage } from './resp';
 import { persistor } from './store';
-import { call } from './functions';
-import { stat } from 'fs/promises';
 
 const PORT = Number(process.env.PORT || '6378');
 const HOST = process.env.HOST || 'localhost';
@@ -42,31 +42,20 @@ const server = net.createServer((socket) => {
 });
 
 void async function () {
-  let dumpPathExists: boolean;
   try {
-    await stat(persistor.dumpPath);
-    dumpPathExists = true;
+    await persistor.restore();
   }
   catch (e) {
-    dumpPathExists = false;
-  }
-
-  if (dumpPathExists) {
-    try {
-      await persistor.restore();
-    }
-    catch (e) {
-      console.error('Failed to resotre data', e);
-      process.exit(1);
-    }
+    error('Failed to resotre data', e);
+    process.exit(1);
   }
 
   server.on('error', (e) => {
-    console.error('Error starting server', e);
+    error('Error starting server', e);
     process.exit(1);
   });
 
   server.listen(PORT, HOST, () => {
-    console.log(`Redis server listening on http://${HOST}:${PORT}`);
+    log(`Redis server listening on http://${HOST}:${PORT}`);
   });
 }();
