@@ -1,7 +1,5 @@
 import { SimpleString } from 'src/resp';
-import { store } from 'src/store';
-
-let saving: Promise<void>;
+import { persistor } from 'src/store';
 
 export const meta = {
   name: 'save',
@@ -11,7 +9,6 @@ export const meta = {
 };
 
 export async function handler() {
-  saving ??= store.dump().finally(() => saving = undefined);
-  await saving;
+  await persistor.save();
   return new SimpleString('OK');
 }

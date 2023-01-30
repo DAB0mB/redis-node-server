@@ -1,5 +1,5 @@
 import { CommandNotImplementedError } from 'src/errors';
-import * as commandDocs from './commandDocs';
+import * as commandDocs from './command_docs';
 
 export const meta = {
   name: 'command',

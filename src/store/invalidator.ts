@@ -4,7 +4,7 @@ import { Store } from './store';
 export class Invalidator {
   private timeouts = new Map<string, NodeJS.Timeout>();
 
-  constructor(private store: Store) {
+  constructor(readonly store: Store) {
   }
 
   watch() {

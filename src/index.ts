@@ -4,8 +4,9 @@ import { commands } from './commands';
 import { Command } from './commands/utils';
 import { UnknownCommandError } from './errors';
 import { RawMessage, parseMessage, stringifyMessage } from './resp';
-import { store } from './store';
+import { persistor } from './store';
 import { call } from './functions';
+import { stat } from 'fs/promises';
 
 const PORT = Number(process.env.PORT || '6378');
 const HOST = process.env.HOST || 'localhost';
@@ -41,12 +42,23 @@ const server = net.createServer((socket) => {
 });
 
 void async function () {
+  let dumpPathExists: boolean;
   try {
-    await store.restore();
+    await stat(persistor.dumpPath);
+    dumpPathExists = true;
   }
   catch (e) {
-    console.error('Failed to resotre data', e);
-    process.exit(1);
+    dumpPathExists = false;
+  }
+
+  if (dumpPathExists) {
+    try {
+      await persistor.restore();
+    }
+    catch (e) {
+      console.error('Failed to resotre data', e);
+      process.exit(1);
+    }
   }
 
   server.on('error', (e) => {
