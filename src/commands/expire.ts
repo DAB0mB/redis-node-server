@@ -4,7 +4,6 @@ import { kExpiresAt } from 'src/store/keys';
 export const meta = {
   name: 'expire',
   summary: 'Set a key\'s time to live in seconds',
-  since: '1.0.0',
   group: 'generic',
   complexity: 'O(1)',
   arguments: [

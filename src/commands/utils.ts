@@ -10,7 +10,6 @@ export type CommandArg = {
 export type CommandMeta = {
   name: string,
   summary: string,
-  since: string,
   group: string,
   complexity: string,
   arguments?: CommandArg[],

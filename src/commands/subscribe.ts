@@ -4,9 +4,8 @@ import { messenger } from 'src/messenger';
 export const meta = {
   name: 'subscribe',
   summary: 'Listen for messages published to the given channels',
-  since: '1.0.0',
   group: 'pubsub',
-  complexity: 'O(N) where N is the number of channels to subscribe to.',
+  complexity: 'O(N) where N is the number of channels to subscribe to',
   arguments: [
     {
       name: 'channel',

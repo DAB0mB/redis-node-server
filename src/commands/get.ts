@@ -4,7 +4,6 @@ import { kValue } from 'src/store/keys';
 export const meta = {
   name: 'get',
   summary: 'Get the value of a key',
-  since: '1.0.0',
   group: 'string',
   complexity: 'O(1)',
   arguments: [

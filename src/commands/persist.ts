@@ -4,7 +4,6 @@ import { kExpiresAt } from 'src/store/keys';
 export const meta = {
   name: 'persist',
   summary: 'Remove the expiration from a key',
-  since: '1.0.0',
   group: 'generic',
   complexity: 'O(1)',
   arguments: [

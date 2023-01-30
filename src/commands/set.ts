@@ -5,7 +5,6 @@ import { kValue } from 'src/store/keys';
 export const meta = {
   name: 'set',
   summary: 'Set the string value of a key',
-  since: '1.0.0',
   group: 'string',
   complexity: 'O(1)',
   arguments: [
