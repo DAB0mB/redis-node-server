@@ -25,6 +25,7 @@ export class Store {
       this.data.set(key, state);
     }
     state[prop] = value;
+    this.events.emit(`set:*`, key, prop, value, state);
     this.events.emit(`set:${prop}`, key, value, state);
     return this;
   }
@@ -37,6 +38,7 @@ export class Store {
     if (prop) {
       deleted = delete state[prop];
       if (deleted) {
+        this.events.emit(`delete:*`, key, prop, state);
         this.events.emit(`delete:${prop}`, key, state);
       }
     }

@@ -2,32 +2,33 @@ import { EventEmitter } from 'events';
 import { readFile, writeFile } from 'fs/promises';
 import { Store } from './store';
 
-export class Persistor {
+export class DataRecorder {
   private saving: Promise<void>;
   private restoring: Promise<void>;
-  private autoSaveTimeout: NodeJS.Timeout;
+  private recordTimeout: NodeJS.Timeout;
   readonly events = new EventEmitter();
 
-  get autoSaving() {
-    return !!this.autoSaveTimeout;
+  get recording() {
+    return !!this.recordTimeout;
   }
 
   constructor(
     readonly store: Store,
-    readonly dumpPath: string,
-    readonly autoSaveInterval: number,
+    readonly dataFile: string,
+    readonly recordInterval: number,
   ) {}
 
   save() {
     return this.saving ??= (async () => {
-      if (this.autoSaving) {
+      if (this.recording) {
         // Reset interval
-        this.stopAutoSave();
-        this.autoSave();
+        this.stop();
+        this.record();
       }
       try {
         const data = this.store.toJSON();
-        await writeFile(this.dumpPath, JSON.stringify(data));
+        await writeFile(this.dataFile, JSON.stringify(data));
+        this.events.emit('save');
       }
       finally {
         this.saving = undefined;
@@ -35,10 +36,10 @@ export class Persistor {
     })();
   }
 
-  restore() {
+  load() {
     return this.restoring ??= (async () => {
       try {
-        const _data = await readFile(this.dumpPath, { encoding: 'utf-8' });
+        const _data = await readFile(this.dataFile, { encoding: 'utf-8' });
         const data = JSON.parse(_data);
         this.store.fromJSON(data);
       }
@@ -53,27 +54,27 @@ export class Persistor {
     })();
   }
 
-  autoSave() {
-    if (this.autoSaving) return false;
-    if (this.autoSaveInterval <= 0) return;
+  record() {
+    if (this.recording) return false;
+    if (this.recordInterval <= 0) return;
 
-    this.autoSaveTimeout = setTimeout(async () => {
+    this.recordTimeout = setTimeout(async () => {
       try {
         await this.save();
-        this.events.emit('autoSave');
+        this.events.emit('recorded');
       }
       catch (e) {
-        this.events.emit('autoSave:error', e);
+        this.events.emit('record:error', e);
       }
-    }, this.autoSaveInterval * 1000);
+    }, this.recordInterval * 1000);
 
     return true;
   }
 
-  stopAutoSave() {
-    if (!this.autoSaving) return false;
-    clearTimeout(this.autoSaveTimeout);
-    this.autoSaveTimeout = undefined;
+  stop() {
+    if (!this.recording) return false;
+    clearTimeout(this.recordTimeout);
+    this.recordTimeout = undefined;
     return true;
   }
 }

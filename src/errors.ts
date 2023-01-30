@@ -9,3 +9,11 @@ export class CommandNotImplementedError extends Error {
     super(`Command '${command}' not implemented`);
   }
 }
+
+export type ErrnoException = Error & {
+  errno?: number;
+  code?: string;
+  path?: string;
+  syscall?: string;
+  stack?: string;
+};

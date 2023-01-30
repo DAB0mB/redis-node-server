@@ -17,7 +17,7 @@ export class Invalidator {
     return true;
   }
 
-  unwatch() {
+  stop() {
     if (!this.watching) return false;
     this.watching = false;
     this.store.events.off(`set:${kExpiresAt}`, this.onSetExpiresAt);

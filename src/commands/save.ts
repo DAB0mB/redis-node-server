@@ -1,5 +1,5 @@
 import { SimpleString } from 'src/resp';
-import { persistor } from 'src/store';
+import { dataRecorder } from 'src/store';
 
 export const meta = {
   name: 'save',
@@ -9,6 +9,6 @@ export const meta = {
 };
 
 export async function handler() {
-  await persistor.save();
+  await dataRecorder.save();
   return new SimpleString('OK');
 }
