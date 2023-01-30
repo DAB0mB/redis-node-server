@@ -9,10 +9,10 @@ export const meta = {
   complexity: 'O(N) where N is the total number of Redis commands',
 };
 
-export const subCommands = {
+export const subcommands = {
   docs: commandDocs,
 };
 
 export function handler() {
-  return new CommandNotImplementedError('command');
-};
+  return new CommandNotImplementedError(meta.name);
+}

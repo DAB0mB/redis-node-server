@@ -16,7 +16,6 @@ export const meta = {
   ],
 };
 
-export function handler(args: String[]) {
-  const key = args[0].toString();
+export function handler([key]: string[]) {
   return store.get<string>(key, kValue) ?? null;
-};
+}

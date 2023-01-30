@@ -18,8 +18,6 @@ export const meta = {
   ],
 };
 
-export function handler(args: String[]) {
-  const channel = args[0].toString();
-  const message = args[1];
+export function handler([channel, message]: string[]) {
   return messenger.publish(channel, message);
-};
+}

@@ -1,3 +1,4 @@
+import { SimpleString } from 'src/resp';
 import { store } from 'src/store';
 
 let saving: Promise<void>;
@@ -13,5 +14,5 @@ export const meta = {
 export async function handler() {
   saving ??= store.dump().finally(() => saving = undefined);
   await saving;
-  return 'OK';
-};
+  return new SimpleString('OK');
+}

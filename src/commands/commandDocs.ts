@@ -20,14 +20,14 @@ export function handler(this: CommandsRecord) {
   const docs = commandsToDocs(this);
   docsResp = new RawMessage(stringifyMessage(docs));
   return docsResp;
-};
+}
 
 function commandsToDocs(commands: CommandsRecord) {
   const entries = Object.values(commands).map((command) => {
     const { name, ..._doc } = command.meta;
     const doc = _doc as Doc;
-    if (command.subCommands) {
-      doc.subcommands = commandsToDocs(command.subCommands)
+    if (command.subcommands) {
+      doc.subcommands = commandsToDocs(command.subcommands)
     }
     return [name, doc] as const;
   });

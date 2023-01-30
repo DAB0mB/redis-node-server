@@ -4,13 +4,14 @@ const CR = '\r';
 const LF = '\n';
 const CRLF = `${CR}${LF}`;
 
-export type Message = string | number | Error | String | Message[];
-export type MessageJS = string | number | Error | String | MessageJS[] | { [key: string]: MessageJS };
+export type Message = string | number | SimpleError | SimpleString | Message[];
+export type MessageJSON = string | number | SimpleError | SimpleString | MessageJSON[] | { [key: string]: MessageJSON };
+export type MessageText = string | RawMessage;
 
 class MessageParser {
   private cursor: Cursor;
 
-  constructor(text: string | RawMessage) {
+  constructor(text: MessageText) {
     this.cursor = new Cursor(text.toString());
   }
 
@@ -37,12 +38,12 @@ class MessageParser {
       message += c;
       c = this.cursor.next(1);
     }
-    return message;
+    return new SimpleString(message);
   }
 
   private parseError() {
     const message = this.parseSimpleString();
-    return new Error(message);
+    return new SimpleError(message);
   }
 
   private parseInteger() {
@@ -57,7 +58,7 @@ class MessageParser {
     if (message == null) return '';
     // CRLF
     this.cursor.next(1);
-    return new String(message);
+    return message;
   }
 
   private parseArray() {
@@ -71,30 +72,27 @@ class MessageParser {
 }
 
 class MessageStringifier {
-  constructor() {
-  }
-
-  stringify(message: MessageJS): string {
+  stringify(message: MessageJSON): string {
     if (message === undefined) {
       throw new Error('Message is undefined');
     }
     if (message === null) {
       return this.stringifyNull();
     }
-    if (message instanceof Array) {
-      return this.stringifyArray(message);
-    }
-    if (message instanceof Error) {
-      return this.stringifyError(message);
-    }
-    if (message instanceof String) {
-      return this.stringifyBulkString(message);
-    }
     if (typeof message == 'string') {
-      return this.stringifySimpleString(message);
+      return this.stringifyBulkString(message);
     }
     if (typeof message == 'number') {
       return this.stringifyInteger(message);
+    }
+    if (message instanceof Array) {
+      return this.stringifyArray(message);
+    }
+    if (message instanceof SimpleError) {
+      return this.stringifyError(message);
+    }
+    if (message instanceof SimpleString) {
+      return this.stringifySimpleString(message);
     }
     if (message instanceof Object) {
       return this.stringifyObject(message);
@@ -102,7 +100,7 @@ class MessageStringifier {
     throw new Error(`Unknown message type: ${message}`);
   }
 
-  private stringifyArray(message: MessageJS[]) {
+  private stringifyArray(message: MessageJSON[]) {
     return `*${message.length}${CRLF}` + message.map(m => this.stringify(m)).join('');
   }
 
@@ -110,14 +108,11 @@ class MessageStringifier {
     return `-${message.message}${CRLF}`;
   }
 
-  private stringifyBulkString(message: String) {
+  private stringifyBulkString(message: string) {
     return `$${message.length}${CRLF}${message}${CRLF}`;
   }
 
-  private stringifySimpleString(message: string) {
-    if (message.indexOf(CRLF) != -1) {
-      throw new Error(`Message is not a safe string: "${message}"`)
-    }
+  private stringifySimpleString(message: SimpleString) {
     return `+${message}${CRLF}`;
   }
 
@@ -128,18 +123,28 @@ class MessageStringifier {
     return `:${message}${CRLF}`;
   }
 
-  private stringifyObject(message: Object) {
-    const flatHash = [].concat(...Object.entries(message)).map((el) => {
-      if (typeof el != 'string') {
-        return el;
-      }
-      return new String(el);
-    });
+  private stringifyObject(message: { [key: string]: MessageJSON }) {
+    const flatHash = [].concat(...Object.entries(message));
     return this.stringify(flatHash);
   }
 
   private stringifyNull() {
     return `$-1${CRLF}`;
+  }
+}
+
+export class SimpleString extends String {
+  constructor(value: string) {
+    if (value.indexOf(CRLF) != -1) {
+      throw new Error(`String is not safe: "${value}"`)
+    }
+    super(value);
+  }
+}
+
+export class SimpleError extends Error {
+  constructor(message: SimpleString) {
+    super(message.toString());
   }
 }
 
@@ -208,10 +213,10 @@ class Cursor {
   }
 }
 
-export function parseMessage(text: string | RawMessage) {
+export function parseMessage(text: MessageText) {
   return new MessageParser(text).parse();
 }
 
-export function stringifyMessage(message: MessageJS) {
+export function stringifyMessage(message: MessageJSON) {
   return new MessageStringifier().stringify(message);
 }

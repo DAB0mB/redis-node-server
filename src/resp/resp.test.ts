@@ -7,4 +7,24 @@ describe('resp', () => {
     const docs = parseMessage(docsResp);
     expect(stringifyMessage(docs)).toEqual(docsResp.toString());
   });
+
+  test('hash stringify yields a flat array of entries', () => {
+    const hash = {
+      a: 'a',
+      b: 'b',
+      c: {
+        d: 'd',
+        e: 'e',
+      },
+    };
+    const flatHash = [
+      'a', 'a',
+      'b', 'b',
+      'c', [
+        'd', 'd',
+        'e', 'e',
+      ],
+    ];
+    expect(stringifyMessage(hash)).toEqual(stringifyMessage(flatHash));
+  });
 });

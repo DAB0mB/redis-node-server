@@ -15,7 +15,6 @@ export const meta = {
   ],
 };
 
-export function handler(args: String[]) {
-  const key = args[0].toLowerCase();
+export function handler([key]: string[]) {
   return store.delete(key) ? 1 : 0;
-};
+}

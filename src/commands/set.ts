@@ -1,4 +1,4 @@
-import { Message } from 'src/resp';
+import { SimpleString } from 'src/resp';
 import { store } from 'src/store';
 import { kValue } from 'src/store/keys';
 
@@ -21,9 +21,7 @@ export const meta = {
   ],
 };
 
-export function handler(args: Message[]) {
-  const key = args[0].toString();
-  const value = args[1];
+export function handler([key, value]: string[]) {
   store.set(key, kValue, value);
-  return 'OK';
-};
+  return new SimpleString('OK');
+}

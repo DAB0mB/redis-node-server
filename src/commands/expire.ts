@@ -20,13 +20,12 @@ export const meta = {
   ],
 };
 
-export function handler(args: String[]) {
-  const key = args[0].toString();
-  const ttl = Number(args[1]);
+export function handler([key, _ttl]: string[]) {
+  const ttl = Number(_ttl);
   if (!store.has(key)) return 0;
   store.set(key, kExpiresAt, Date.now() + toMiliseconds(ttl));
   return 1;
-};
+}
 
 const toMiliseconds = (s: number) => {
   return s * 1000;

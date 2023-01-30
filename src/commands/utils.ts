@@ -16,11 +16,11 @@ export type CommandMeta = {
   arguments?: CommandArg[],
 };
 
-export type CommandHandler = (this: CommandsRecord, args: String[], socket: Socket) => Message | RawMessage | Promise<Message | RawMessage>;
+export type CommandHandler = (this: CommandsRecord, args: string[], socket: Socket) => Message | RawMessage | Promise<Message | RawMessage>;
 
 export type Command = {
   meta: CommandMeta,
-  subCommands?: CommandsRecord,
+  subcommands?: CommandsRecord,
   handler: CommandHandler,
 };
 

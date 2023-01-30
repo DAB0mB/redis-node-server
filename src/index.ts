@@ -14,18 +14,18 @@ const server = net.createServer((socket) => {
   socket.on('data', async (data) => {
     try {
       const localMessage = assertGet(parseMessage(data.toString()), Array);
-      const args = localMessage.map(m => assertGet(m, String));
-      let subCommands = commands;
+      const args = localMessage.map(m => assertGet(m, 'string'));
+      let subcommands = commands;
       let commandName: string;
       let command: Command;
       do {
         commandName = args.shift().toLowerCase();
-        command = subCommands[commandName];
+        command = subcommands[commandName];
         if (!command) {
           throw new UnknownCommandError(commandName);
         }
-        subCommands = command.subCommands;
-      } while (subCommands && args.length);
+        subcommands = command.subcommands;
+      } while (subcommands && args.length);
       const remoteMessage = await call(command.handler, commands, args, socket);
       if (remoteMessage instanceof RawMessage) {
         socket.write(remoteMessage.toString());

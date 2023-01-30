@@ -16,13 +16,12 @@ export const meta = {
   ],
 };
 
-export function handler(args: String[]) {
-  const key = args[0].toString();
+export function handler([key]: string[]) {
   if (!store.has(key)) return -2;
   const expiresAt = store.get<number>(key, kExpiresAt);
   if (!expiresAt) return -1;
   return toSeconds(expiresAt - Date.now());
-};
+}
 
 const toSeconds = (ms: number, transform = Math.floor) => {
   return transform(ms / 1000);

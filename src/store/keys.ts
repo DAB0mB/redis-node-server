@@ -1,2 +1,2 @@
 export const kValue = 'v';
-export const kExpiresAt = 'ea';
+export const kExpiresAt = 'e';
