@@ -5,6 +5,7 @@ const LF = '\n';
 const CRLF = `${CR}${LF}`;
 
 export type Message = string | number | Error | String | Message[];
+export type MessageJS = string | number | Error | String | MessageJS[] | { [key: string]: MessageJS };
 
 class MessageParser {
   private cursor: Cursor;
@@ -73,7 +74,13 @@ class MessageStringifier {
   constructor() {
   }
 
-  stringify(message: Message): string {
+  stringify(message: MessageJS): string {
+    if (message === undefined) {
+      throw new Error('Message is undefined');
+    }
+    if (message === null) {
+      return this.stringifyNull();
+    }
     if (message instanceof Array) {
       return this.stringifyArray(message);
     }
@@ -89,13 +96,13 @@ class MessageStringifier {
     if (typeof message == 'number') {
       return this.stringifyInteger(message);
     }
-    if (message === null) {
-      return this.stringifyNull();
+    if (message instanceof Object) {
+      return this.stringifyObject(message);
     }
     throw new Error(`Unknown message type: ${message}`);
   }
 
-  private stringifyArray(message: Message[]) {
+  private stringifyArray(message: MessageJS[]) {
     return `*${message.length}${CRLF}` + message.map(m => this.stringify(m)).join('');
   }
 
@@ -119,6 +126,16 @@ class MessageStringifier {
       throw new Error(`Message is not an integer: ${message}`);
     }
     return `:${message}${CRLF}`;
+  }
+
+  private stringifyObject(message: Object) {
+    const flatHash = [].concat(...Object.entries(message)).map((el) => {
+      if (typeof el != 'string') {
+        return el;
+      }
+      return new String(el);
+    });
+    return this.stringify(flatHash);
   }
 
   private stringifyNull() {
@@ -195,6 +212,6 @@ export function parseMessage(text: string | RawMessage) {
   return new MessageParser(text).parse();
 }
 
-export function stringifyMessage(message: Message) {
+export function stringifyMessage(message: MessageJS) {
   return new MessageStringifier().stringify(message);
 }

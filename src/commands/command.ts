@@ -1,10 +1,18 @@
-import { UnknownCommandError } from 'src/errors';
-import { commandDocs } from './commandDocs';
+import { CommandNotImplementedError } from 'src/errors';
+import * as commandDocs from './commandDocs';
 
-command.subCommands = {
+export const meta = {
+  name: 'command',
+  summary: 'Get array of Redis command details',
+  since: '1.0.0',
+  group: 'server',
+  complexity: 'O(N) where N is the total number of Redis commands',
+};
+
+export const subCommands = {
   docs: commandDocs,
 };
 
-export function command() {
-  return new UnknownCommandError('command');
+export function handler() {
+  return new CommandNotImplementedError('command');
 };

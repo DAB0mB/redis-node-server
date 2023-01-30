@@ -1,7 +1,22 @@
 import { store } from 'src/store';
 import { kValue } from 'src/store/keys';
 
-export function get(args: String[]) {
+export const meta = {
+  name: 'get',
+  summary: 'Get the value of a key',
+  since: '1.0.0',
+  group: 'string',
+  complexity: 'O(1)',
+  arguments: [
+    {
+      name: 'key',
+      type: 'key',
+      key_spec_index: 0,
+    },
+  ],
+};
+
+export function handler(args: String[]) {
   const key = args[0].toString();
   return store.get<string>(key, kValue) ?? null;
 };

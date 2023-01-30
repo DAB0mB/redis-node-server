@@ -1,5 +1,6 @@
 {
   "name": "redis-node-server",
+  "version": "0.1.0",
   "private": true,
   "devDependencies": {
     "@jest/globals": "^29.4.1",

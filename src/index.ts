@@ -5,6 +5,7 @@ import { Command } from './commands/utils';
 import { UnknownCommandError } from './errors';
 import { RawMessage, parseMessage, stringifyMessage } from './resp';
 import { store } from './store';
+import { call } from './functions';
 
 const PORT = Number(process.env.PORT || '6378');
 const HOST = process.env.HOST || 'localhost';
@@ -25,7 +26,7 @@ const server = net.createServer((socket) => {
         }
         subCommands = command.subCommands;
       } while (subCommands && args.length);
-      const remoteMessage = await command(args, socket);
+      const remoteMessage = await call(command.handler, commands, args, socket);
       if (remoteMessage instanceof RawMessage) {
         socket.write(remoteMessage.toString());
       }

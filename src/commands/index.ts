@@ -1,17 +1,17 @@
-import { command } from './command';
-import { del } from './del';
-import { expire } from './expire';
-import { get } from './get';
-import { persist } from './persist';
-import { publish } from './publish';
-import { save } from './save';
-import { set } from './set';
-import { subscribe } from './subscribe';
-import { ttl } from './ttl';
-import { unsubscribe } from './unsubscribe';
-import { Command } from './utils';
+import * as command from './command';
+import * as del from './del';
+import * as expire from './expire';
+import * as get from './get';
+import * as persist from './persist';
+import * as publish from './publish';
+import * as save from './save';
+import * as set from './set';
+import * as subscribe from './subscribe';
+import * as ttl from './ttl';
+import * as unsubscribe from './unsubscribe';
+import { CommandsRecord } from './utils';
 
-export const commands: Record<string, Command> = {
+export const commands: CommandsRecord = {
   command,
   del,
   expire,
