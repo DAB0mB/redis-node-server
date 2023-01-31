@@ -1,16 +1,16 @@
 import { kExpiresAt } from './keys';
 import { Store } from './store';
 
-export class Invalidator {
+export class GarbageCollector {
   private timeouts = new Map<string, NodeJS.Timeout>();
-  private watching = false;
+  private started = false;
 
   constructor(readonly store: Store) {
   }
 
-  watch() {
-    if (this.watching) return false;
-    this.watching = true;
+  start() {
+    if (this.started) return false;
+    this.started = true;
     this.store.events.on(`set:${kExpiresAt}`, this.onSetExpiresAt);
     this.store.events.on(`delete:${kExpiresAt}`, this.onDeleteExpiresAt);
     this.store.events.on(`delete`, this.onDeleteExpiresAt);
@@ -18,8 +18,8 @@ export class Invalidator {
   }
 
   stop() {
-    if (!this.watching) return false;
-    this.watching = false;
+    if (!this.started) return false;
+    this.started = false;
     this.store.events.off(`set:${kExpiresAt}`, this.onSetExpiresAt);
     this.store.events.off(`delete:${kExpiresAt}`, this.onDeleteExpiresAt);
     this.store.events.off(`delete`, this.onDeleteExpiresAt);

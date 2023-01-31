@@ -12,10 +12,10 @@ const delimiter = '\r\n';
 
 export class ActivityRecorder {
   private writer: WriteStream;
-  private resetting: Promise<void>;
+  private clearing: Promise<void>;
   private storeListenersDisabled = false;
 
-  get recording() {
+  get started() {
     return !!this.writer;
   }
 
@@ -24,8 +24,8 @@ export class ActivityRecorder {
     readonly activityFile: string,
   ) {}
 
-  record() {
-    if (this.recording) return false;
+  start() {
+    if (this.started) return false;
     this.writer = this.createFileWriter();
     this.store.events.on('set:*', this.onSetProp);
     this.store.events.on('delete:*', this.onDeleteProp);
@@ -34,7 +34,7 @@ export class ActivityRecorder {
   }
 
   stop() {
-    if (!this.recording) return false;
+    if (!this.started) return false;
     this.writer.close();
     this.writer = undefined;
     this.store.events.off('set:*', this.onSetProp);
@@ -43,13 +43,13 @@ export class ActivityRecorder {
     return true;
   }
 
-  reset() {
-    return this.resetting ??= (async () => {
+  clear() {
+    return this.clearing ??= (async () => {
       try {
         await writeFile(this.activityFile, '');
       }
       finally {
-        this.resetting = undefined;
+        this.clearing = undefined;
         this.resetWriterPosition();
       }
     })();
@@ -124,16 +124,16 @@ export class ActivityRecorder {
   }
 
   private resetWriterPosition() {
-    if (this.writer) {
-      this.writer.close();
-      this.writer = this.createFileWriter();
-    }
+    if (!this.writer) return;
+    this.writer.close();
+    this.writer = this.createFileWriter();
   }
 
   private createStoreListener<F extends FunctionType>(fn: F) {
     return async (...args: ArgumentsType<F>) => {
       if (this.storeListenersDisabled) return;
-      await this.resetting;
+      await this.clearing;
+      if (!this.started) return;
       return fn(...args) as ReturnType<F>;
     };
   }

@@ -8,7 +8,7 @@ export class DataRecorder {
   private recordTimeout: NodeJS.Timeout;
   readonly events = new EventEmitter();
 
-  get recording() {
+  get started() {
     return !!this.recordTimeout;
   }
 
@@ -20,10 +20,10 @@ export class DataRecorder {
 
   save() {
     return this.saving ??= (async () => {
-      if (this.recording) {
+      if (this.started) {
         // Reset interval
         this.stop();
-        this.record();
+        this.start();
       }
       try {
         const data = this.store.toJSON();
@@ -54,8 +54,8 @@ export class DataRecorder {
     })();
   }
 
-  record() {
-    if (this.recording) return false;
+  start() {
+    if (this.started) return false;
     if (this.recordInterval <= 0) return;
 
     this.recordTimeout = setTimeout(async () => {
@@ -72,7 +72,7 @@ export class DataRecorder {
   }
 
   stop() {
-    if (!this.recording) return false;
+    if (!this.started) return false;
     clearTimeout(this.recordTimeout);
     this.recordTimeout = undefined;
     return true;

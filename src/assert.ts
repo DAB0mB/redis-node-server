@@ -20,9 +20,3 @@ export function assertGet<T extends AssertType>(object: unknown, type: T): Asser
 export function assertThrow<T extends AssertType>(object: unknown, type: T): asserts object is Assert<T> {
   assertGet<T>(object, type);
 }
-
-export function assertExists<T>(object: T, name: string): asserts object is T {
-  if (object == null) {
-    throw new Error(`Object "${name}" does not exist`);
-  }
-}

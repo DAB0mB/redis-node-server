@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { error, log } from 'src/console';
 import { ActivityRecorder } from './activity_recorder';
 import { DataRecorder } from './data_recorder';
-import { Invalidator } from './invalidator';
+import { GarbageCollector } from './garbage_collector';
 import { Store } from './store';
 
 const activityFile = process.env.ACTIVITY_FILE || resolve(process.cwd(), 'activity.log');
@@ -10,9 +10,9 @@ const dataFile = process.env.DATA_FILE || resolve(process.cwd(), 'data.json');
 const dataRecordInterval = Number(process.env.DATA_RECORD_INTERVAL || '60');
 
 export const store = new Store();
-export const invalidator = new Invalidator(store);
 export const activityRecorder = new ActivityRecorder(store, activityFile);
 export const dataRecorder = new DataRecorder(store, dataFile, dataRecordInterval);
+export const garbageCollector = new GarbageCollector(store);
 
 export async function initStore() {
   try {
@@ -20,7 +20,7 @@ export async function initStore() {
     const anyActivities = !!await activityRecorder.load();
     if (anyActivities) {
       await dataRecorder.save();
-      await activityRecorder.reset();
+      await activityRecorder.clear();
     }
   }
   catch (e) {
@@ -30,10 +30,10 @@ export async function initStore() {
 
   dataRecorder.events.on('save', async () => {
     try {
-      await activityRecorder.reset();
+      await activityRecorder.clear();
     }
     catch (e) {
-      error('Activity reset error', e);
+      error('Failed to clear activity log', e);
     }
   });
   
@@ -45,7 +45,7 @@ export async function initStore() {
     error('Data record error', e);
   });
 
-  activityRecorder.record();
-  dataRecorder.record();
-  invalidator.watch();
+  activityRecorder.start();
+  dataRecorder.start();
+  garbageCollector.start();
 }
