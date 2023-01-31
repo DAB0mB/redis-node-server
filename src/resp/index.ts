@@ -5,7 +5,7 @@ const LF = '\n';
 const CRLF = `${CR}${LF}`;
 
 export type Message = string | number | SimpleError | SimpleString | Message[];
-export type MessageJSON = string | number | SimpleError | SimpleString | MessageJSON[] | { [key: string]: MessageJSON };
+export type MessageJSON = string | number | boolean | SimpleError | SimpleString | MessageJSON[] | { [key: string]: MessageJSON };
 export type MessageText = string | RawMessage;
 
 class MessageParser {
@@ -73,10 +73,7 @@ class MessageParser {
 
 class MessageStringifier {
   stringify(message: MessageJSON): string {
-    if (message === undefined) {
-      throw new Error('Message is undefined');
-    }
-    if (message === null) {
+    if (message == null) {
       return this.stringifyNull();
     }
     if (typeof message == 'string') {
@@ -84,6 +81,9 @@ class MessageStringifier {
     }
     if (typeof message == 'number') {
       return this.stringifyInteger(message);
+    }
+    if (typeof message == 'boolean') {
+      return this.stringifyBoolean(message);
     }
     if (message instanceof Array) {
       return this.stringifyArray(message);
@@ -121,6 +121,10 @@ class MessageStringifier {
       throw new Error(`Message is not an integer: ${message}`);
     }
     return `:${message}${CRLF}`;
+  }
+
+  private stringifyBoolean(message: boolean) {
+    return this.stringifyInteger(message ? 1 : 0);
   }
 
   private stringifyObject(message: { [key: string]: MessageJSON }) {

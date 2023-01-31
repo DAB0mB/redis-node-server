@@ -15,5 +15,5 @@ export const meta = {
 };
 
 export function handler([key]: string[]) {
-  return store.delete(key) ? 1 : 0;
+  return store.delete(key);
 }

@@ -16,5 +16,5 @@ export const meta = {
 };
 
 export function handler([key]: string[]) {
-  return store.get<string>(key, kValue) ?? null;
+  return store.get<string>(key, kValue);
 }

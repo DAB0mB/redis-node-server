@@ -15,5 +15,5 @@ export const meta = {
 };
 
 export function handler([channel]: string[], socket: Socket) {
-  return messenger.subscribe(socket, channel) ? 1 : 0;
+  return messenger.subscribe(socket, channel);
 }

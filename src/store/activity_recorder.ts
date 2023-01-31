@@ -2,14 +2,18 @@ import { WriteStream, createReadStream, createWriteStream } from 'fs';
 import { writeFile } from 'fs/promises';
 import * as readline from 'readline';
 import { assertGet } from 'src/assert';
-import { Store } from './store';
 import { ErrnoException } from 'src/errors';
+import { ArgumentsType, FunctionType } from 'src/functions';
+import { Store } from './store';
 
+const kSet = 's';
+const kDel = 'd';
 const delimiter = '\r\n';
 
 export class ActivityRecorder {
   private writer: WriteStream;
   private resetting: Promise<void>;
+  private storeListenersDisabled = false;
 
   get recording() {
     return !!this.writer;
@@ -22,14 +26,14 @@ export class ActivityRecorder {
 
   record() {
     if (this.recording) return false;
-    this.writer = createWriteStream(this.activityFile, { flags: 'a' });
+    this.writer = this.createFileWriter();
     this.store.events.on('set:*', this.onSetProp);
     this.store.events.on('delete:*', this.onDeleteProp);
     this.store.events.on('delete', this.onDeleteKey);
     return true;
   }
 
-  unrecord() {
+  stop() {
     if (!this.recording) return false;
     this.writer.close();
     this.writer = undefined;
@@ -46,22 +50,21 @@ export class ActivityRecorder {
       }
       finally {
         this.resetting = undefined;
-        if (this.unrecord()) this.record();
+        this.resetWriterPosition();
       }
     })();
   }
 
   async load() {
-    let activityCount = 0;
+    let loadCount = 0;
     const reader = createReadStream(this.activityFile);
 
     const fileExists = await new Promise<boolean>((resolve, reject) => {
       reader.on('open', () => resolve(true));
       reader.on('error', (e?: ErrnoException) => e?.code === 'ENOENT' ? resolve(false) : reject(e));
     });
-    if (!fileExists) return activityCount;
+    if (!fileExists) return loadCount;
 
-    const recorded = this.unrecord();
     try {
       const lines = readline.createInterface({
         input: reader,
@@ -80,47 +83,70 @@ export class ActivityRecorder {
         const action = assertGet(activity[0], 'string');
         const params = activity.slice(1);
   
-        switch (action) {
-          case 'set': {
-            const key = assertGet(params[0], 'string');
-            const prop = assertGet(params[1], 'string');
-            const value = params[2];
-            this.store.set(key, prop, value);
-            break;
-          }
-          case 'delete': {
-            const key = assertGet(params[0], 'string');
-            const prop = params[1];
-            this.store.delete(key, prop);
-            break;
-          }
-          default: {
-            throw new Error(`Unknown action "${action}"`);
+        try {
+          this.storeListenersDisabled = true;
+
+          switch (action) {
+            case kSet: {
+              const key = assertGet(params[0], 'string');
+              const prop = assertGet(params[1], 'string');
+              const value = params[2];
+              this.store.set(key, prop, value);
+              break;
+            }
+            case kDel: {
+              const key = assertGet(params[0], 'string');
+              const prop = params[1];
+              this.store.delete(key, prop);
+              break;
+            }
+            default: {
+              throw new Error(`Unknown action "${action}"`);
+            }
           }
         }
-        activityCount++;
+        finally {
+          this.storeListenersDisabled = false;
+        }
+
+        loadCount++;
       }
     }
     finally {
       reader.close();
-      if (recorded) this.record();
     }
 
-    return activityCount;
+    return loadCount;
   }
 
-  private onSetProp = async (key: string, prop: string, value: unknown) => {
-    await this.resetting;
-    this.writer.write(JSON.stringify(['set', key, prop, value]) + delimiter);
-  };
-
-  private onDeleteProp = async (key: string, prop: string) => {
-    await this.resetting;
-    this.writer.write(JSON.stringify(['delete', key, prop]) + delimiter);
+  private createFileWriter() {
+    return createWriteStream(this.activityFile, { flags: 'a' });
   }
 
-  private onDeleteKey = async (key: string) => {
-    await this.resetting;
-    this.writer.write(JSON.stringify(['delete', key]) + delimiter);
+  private resetWriterPosition() {
+    if (this.writer) {
+      this.writer.close();
+      this.writer = this.createFileWriter();
+    }
   }
+
+  private createStoreListener<F extends FunctionType>(fn: F) {
+    return async (...args: ArgumentsType<F>) => {
+      if (this.storeListenersDisabled) return;
+      await this.resetting;
+      return fn(...args) as ReturnType<F>;
+    };
+  }
+
+  private onSetProp = this.createStoreListener((key: string, prop: string, value: unknown) => {
+    this.writer.write(JSON.stringify([kSet, key, prop, value]) + delimiter);
+  });
+
+  private onDeleteProp = this.createStoreListener((key: string, prop: string) => {
+    this.writer.write(JSON.stringify([kDel, key, prop]) + delimiter);
+  });
+
+  private onDeleteKey = this.createStoreListener((key: string) => {
+    this.writer.write(JSON.stringify([kDel, key]) + delimiter);
+  });
 }

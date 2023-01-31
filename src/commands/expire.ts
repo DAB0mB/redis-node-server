@@ -21,9 +21,9 @@ export const meta = {
 
 export function handler([key, _ttl]: string[]) {
   const ttl = Number(_ttl);
-  if (!store.has(key)) return 0;
+  if (!store.has(key)) return false;
   store.set(key, kExpiresAt, Date.now() + toMiliseconds(ttl));
-  return 1;
+  return true;
 }
 
 const toMiliseconds = (s: number) => {

@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { Message, RawMessage } from 'src/resp';
+import { MessageJSON, RawMessage } from 'src/resp';
 
 export type CommandArg = {
   name: string,
@@ -15,7 +15,7 @@ export type CommandMeta = {
   arguments?: CommandArg[],
 };
 
-export type CommandHandler = (this: CommandsRecord, args: string[], socket: Socket) => Message | RawMessage | Promise<Message | RawMessage>;
+export type CommandHandler = (this: CommandsRecord, args: string[], socket: Socket) => MessageJSON | RawMessage | Promise<MessageJSON | RawMessage>;
 
 export type Command = {
   meta: CommandMeta,
