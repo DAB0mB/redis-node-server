@@ -1,11 +1,11 @@
 import { Socket } from 'net';
-import { RawMessage, parseMessage, stringifyMessage } from '~/resp';
 import { assertGet } from '~/utils/assert';
+import { error } from '~/utils/console';
 import { UnknownCommandError } from '~/utils/errors';
 import { call } from '~/utils/functions';
+import { RawMessage, parseMessage, stringifyMessage } from '~/resp';
 import { Command } from './command';
 import { commands } from './commands';
-import { error } from '~/utils/console';
 
 export const onCommandRequest = async (socket: Socket, data: Buffer) => {
   try {

@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
+import { MessageJSON } from '~/resp';
 import { assertGet, assertThrow } from '~/utils/assert';
 
-type State = { [key: string]: unknown };
+type State = { [key: string]: MessageJSON };
 
 export class Store {
   private data = new Map<string, State>();
@@ -18,7 +19,7 @@ export class Store {
     return prop in state;
   }
 
-  set(key: string, prop: string, value: unknown) {
+  set(key: string, prop: string, value: MessageJSON) {
     let state = this.data.get(key);
     if (!state) {
       state = {};
@@ -52,23 +53,19 @@ export class Store {
     return deleted;
   }
 
-  toJSON() {
-    return [...this.data.entries()];
+  *getEntries() {
+    for (const entry of this.data) {
+      yield entry;
+    }
   }
 
-  fromJSON(_data: unknown) {
-    const data = assertGet(_data, Array).map(entry => {
-      assertThrow(entry, Array);
-      const key = assertGet(entry[0], 'string');
-      const state = assertGet(entry[1], Object) as State;
-      return [key, state] as const;
-    });
-
-    for (const [key, state] of data) {
-      for (const [prop, value] of Object.entries(state)) {
-        // Trigger events
-        this.set(key, prop, value);
-      }
+  setEntry(entry: unknown) {
+    assertThrow(entry, Array);
+    const key = assertGet(entry[0], 'string');
+    const state = assertGet(entry[1], Object) as State;
+    for (const [prop, value] of Object.entries(state)) {
+      // Trigger events
+      this.set(key, prop, value);
     }
   }
 }

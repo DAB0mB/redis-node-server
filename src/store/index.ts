@@ -5,8 +5,8 @@ import { DataRecorder } from './data_recorder';
 import { GarbageCollector } from './garbage_collector';
 import { Store } from './store';
 
-const activityFile = resolve(process.env.ACTIVITY_FILE || './activity.log');
-const dataFile = resolve(process.env.DATA_FILE || './data.json');
+const activityFile = resolve(process.env.ACTIVITY_FILE || './activity.jsonl');
+const dataFile = resolve(process.env.DATA_FILE || './data.jsonl');
 const dataRecordInterval = Number(process.env.DATA_RECORD_INTERVAL || '60');
 
 export const store = new Store();
@@ -36,11 +36,11 @@ export async function initStore() {
       error('Failed to clear activity log', e);
     }
   });
-  
+
   dataRecorder.events.on('recorded', () => {
     log('Data recorded');
   });
-  
+
   dataRecorder.events.on('record:error', (e) => {
     error('Data record error', e);
   });

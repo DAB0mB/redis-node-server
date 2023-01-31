@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events';
-import { readFile, writeFile } from 'fs/promises';
+import { JSONLFile, JSONRecord, } from '~/jsonl';
 import { Store } from './store';
 
 export class DataRecorder {
   private saving: Promise<void>;
-  private restoring: Promise<void>;
+  private loading: Promise<void>;
   private recordTimeout: NodeJS.Timeout;
+  private dataFile = new JSONLFile(this.dataFilePath);
   readonly events = new EventEmitter();
 
   get started() {
@@ -14,34 +15,44 @@ export class DataRecorder {
 
   constructor(
     readonly store: Store,
-    readonly dataFile: string,
+    readonly dataFilePath: string,
     readonly recordInterval: number,
   ) {}
 
   save() {
     return this.saving ??= (async () => {
+      const writer = this.dataFile.createWriter();
+
       if (this.started) {
         // Reset interval
         this.stop();
         this.start();
       }
+
       try {
-        const data = this.store.toJSON();
-        await writeFile(this.dataFile, JSON.stringify(data));
-        this.events.emit('save');
+        await this.dataFile.clear();
+        await writer.next();
+        for (const entry of this.store.getEntries()) {
+          await writer.next(entry as JSONRecord);
+        }
       }
       finally {
         this.saving = undefined;
+        writer.return();
       }
+
+      this.events.emit('save');
     })();
   }
 
   load() {
-    return this.restoring ??= (async () => {
+    return this.loading ??= (async () => {
+      const reader = this.dataFile.createReader();
+
       try {
-        const _data = await readFile(this.dataFile, { encoding: 'utf-8' });
-        const data = JSON.parse(_data);
-        this.store.fromJSON(data);
+        for await (const line of reader) {
+          this.store.setEntry(line);
+        }
       }
       catch (e) {
         if (!e || e.code !== 'ENOENT') {
@@ -49,7 +60,8 @@ export class DataRecorder {
         }
       }
       finally {
-        this.restoring = undefined;
+        this.loading = undefined;
+        reader.return();
       }
     })();
   }

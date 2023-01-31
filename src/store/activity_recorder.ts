@@ -1,19 +1,17 @@
-import { WriteStream, createReadStream, createWriteStream } from 'fs';
-import { writeFile } from 'fs/promises';
-import * as readline from 'readline';
+import { JSONLFile, JSONLWriter, JSONRecord } from '~/jsonl';
 import { assertGet } from '~/utils/assert';
-import { ErrnoException } from '~/utils/errors';
 import { ArgumentsType, FunctionType } from '~/utils/functions';
 import { Store } from './store';
 
 const kSet = 's';
 const kDel = 'd';
-const delimiter = '\r\n';
 
 export class ActivityRecorder {
-  private writer: WriteStream;
+  private writer: JSONLWriter;
   private clearing: Promise<void>;
+  private loading: Promise<number>;
   private storeListenersDisabled = false;
+  private activityFile = new JSONLFile(this.activityFilePath);
 
   get started() {
     return !!this.writer;
@@ -21,12 +19,12 @@ export class ActivityRecorder {
 
   constructor(
     readonly store: Store,
-    readonly activityFile: string,
+    readonly activityFilePath: string,
   ) {}
 
   start() {
     if (this.started) return false;
-    this.writer = this.createFileWriter();
+    this.writer = this.createWriter();
     this.store.events.on('set:*', this.onSetProp);
     this.store.events.on('delete:*', this.onDeleteProp);
     this.store.events.on('delete', this.onDeleteKey);
@@ -35,7 +33,7 @@ export class ActivityRecorder {
 
   stop() {
     if (!this.started) return false;
-    this.writer.close();
+    this.writer.return();
     this.writer = undefined;
     this.store.events.off('set:*', this.onSetProp);
     this.store.events.off('delete:*', this.onDeleteProp);
@@ -46,7 +44,7 @@ export class ActivityRecorder {
   clear() {
     return this.clearing ??= (async () => {
       try {
-        await writeFile(this.activityFile, '');
+        await this.activityFile.clear();
       }
       finally {
         this.clearing = undefined;
@@ -55,78 +53,65 @@ export class ActivityRecorder {
     })();
   }
 
-  async load() {
-    let loadCount = 0;
-    const reader = createReadStream(this.activityFile);
+  load() {
+    return this.loading ??= (async () => {
+      const reader = this.activityFile.createReader();
+      let loadCount = 0;
 
-    const fileExists = await new Promise<boolean>((resolve, reject) => {
-      reader.on('open', () => resolve(true));
-      reader.on('error', (e?: ErrnoException) => e?.code === 'ENOENT' ? resolve(false) : reject(e));
-    });
-    if (!fileExists) return loadCount;
+      try {
+        for await (const line of reader) {
+          const activity = assertGet(line, Array);
+          const action = assertGet(activity[0], 'string');
+          const params = activity.slice(1);
 
-    try {
-      const lines = readline.createInterface({
-        input: reader,
-        crlfDelay: Infinity,
-      });
-  
-      for await (const line of lines) {
-        let _activity: unknown;
-        try {
-          _activity = JSON.parse(line);
-        }
-        catch (e) {
-          continue;
-        }
-        const activity = assertGet(_activity, Array);
-        const action = assertGet(activity[0], 'string');
-        const params = activity.slice(1);
-  
-        try {
-          this.storeListenersDisabled = true;
+          try {
+            this.storeListenersDisabled = true;
 
-          switch (action) {
-            case kSet: {
-              const key = assertGet(params[0], 'string');
-              const prop = assertGet(params[1], 'string');
-              const value = params[2];
-              this.store.set(key, prop, value);
-              break;
-            }
-            case kDel: {
-              const key = assertGet(params[0], 'string');
-              const prop = params[1];
-              this.store.delete(key, prop);
-              break;
-            }
-            default: {
-              throw new Error(`Unknown action "${action}"`);
+            switch (action) {
+              case kSet: {
+                const key = assertGet(params[0], 'string');
+                const prop = assertGet(params[1], 'string');
+                const value = params[2];
+                this.store.set(key, prop, value);
+                break;
+              }
+              case kDel: {
+                const key = assertGet(params[0], 'string');
+                const prop = params[1];
+                this.store.delete(key, prop);
+                break;
+              }
+              default: {
+                throw new Error(`Unknown action "${action}"`);
+              }
             }
           }
-        }
-        finally {
-          this.storeListenersDisabled = false;
-        }
+          finally {
+            this.storeListenersDisabled = false;
+          }
 
-        loadCount++;
+          loadCount++;
+        }
       }
-    }
-    finally {
-      reader.close();
-    }
+      finally {
+        this.loading = undefined;
+        reader.return();
+      }
 
-    return loadCount;
+      return loadCount;
+    })();
   }
 
-  private createFileWriter() {
-    return createWriteStream(this.activityFile, { flags: 'a' });
+  private createWriter() {
+    const writer = this.activityFile.createWriter();
+    writer.next();
+    return writer;
   }
 
   private resetWriterPosition() {
     if (!this.writer) return;
-    this.writer.close();
-    this.writer = this.createFileWriter();
+    this.writer.return();
+    this.writer = this.createWriter();
   }
 
   private createStoreListener<F extends FunctionType>(fn: F) {
@@ -138,15 +123,15 @@ export class ActivityRecorder {
     };
   }
 
-  private onSetProp = this.createStoreListener((key: string, prop: string, value: unknown) => {
-    this.writer.write(JSON.stringify([kSet, key, prop, value]) + delimiter);
+  private onSetProp = this.createStoreListener((key: string, prop: string, value: JSONRecord) => {
+    this.writer.next([kSet, key, prop, value]);
   });
 
   private onDeleteProp = this.createStoreListener((key: string, prop: string) => {
-    this.writer.write(JSON.stringify([kDel, key, prop]) + delimiter);
+    this.writer.next([kDel, key, prop]);
   });
 
   private onDeleteKey = this.createStoreListener((key: string) => {
-    this.writer.write(JSON.stringify([kDel, key]) + delimiter);
+    this.writer.next([kDel, key]);
   });
 }

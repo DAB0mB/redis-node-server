@@ -1,8 +1,8 @@
 # Logs
 *.log
 # Recorder files
-activity.log
-data.json
+activity.jsonl
+data.jsonl
 # API keys and secrets
 .env
 # Dependency directory
