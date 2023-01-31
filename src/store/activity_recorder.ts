@@ -1,9 +1,9 @@
 import { WriteStream, createReadStream, createWriteStream } from 'fs';
 import { writeFile } from 'fs/promises';
 import * as readline from 'readline';
-import { assertGet } from 'src/assert';
-import { ErrnoException } from 'src/errors';
-import { ArgumentsType, FunctionType } from 'src/functions';
+import { assertGet } from '~/utils/assert';
+import { ErrnoException } from '~/utils/errors';
+import { ArgumentsType, FunctionType } from '~/utils/functions';
 import { Store } from './store';
 
 const kSet = 's';

@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { MessageJSON, RawMessage } from 'src/resp';
+import { MessageJSON, RawMessage } from '~/resp';
 
 export type CommandArg = {
   name: string,

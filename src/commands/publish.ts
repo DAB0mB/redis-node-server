@@ -1,4 +1,4 @@
-import { messenger } from 'src/messenger';
+import { messenger } from '~/messenger';
 
 export const meta = {
   name: 'publish',

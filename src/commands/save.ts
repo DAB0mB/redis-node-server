@@ -1,5 +1,5 @@
-import { SimpleString } from 'src/resp';
-import { dataRecorder } from 'src/store';
+import { SimpleString } from '~/resp';
+import { dataRecorder } from '~/store';
 
 export const meta = {
   name: 'save',

@@ -11,9 +11,9 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "*": ["*"]
+      "~/*": ["*"]
     }
   },
   "include": [

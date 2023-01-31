@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { error, log } from 'src/console';
+import { error, log } from '~/utils/console';
 import { ActivityRecorder } from './activity_recorder';
 import { DataRecorder } from './data_recorder';
 import { GarbageCollector } from './garbage_collector';

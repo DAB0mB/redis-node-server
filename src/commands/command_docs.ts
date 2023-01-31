@@ -1,4 +1,4 @@
-import { RawMessage, stringifyMessage } from 'src/resp';
+import { RawMessage, stringifyMessage } from '~/resp';
 import { CommandMeta, CommandsRecord } from './utils';
 
 let docsResp: RawMessage;

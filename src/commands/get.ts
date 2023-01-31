@@ -1,5 +1,5 @@
-import { store } from 'src/store';
-import { kValue } from 'src/store/keys';
+import { store } from '~/store';
+import { kValue } from '~/store/keys';
 
 export const meta = {
   name: 'get',

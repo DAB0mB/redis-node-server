@@ -1,12 +1,12 @@
 import * as net from 'net';
-import { assertGet } from './assert';
 import { commands } from './commands';
 import { Command } from './commands/utils';
-import { error, log } from './console';
-import { UnknownCommandError } from './errors';
-import { call } from './functions';
 import { RawMessage, parseMessage, stringifyMessage } from './resp';
 import { initStore } from './store';
+import { assertGet } from './utils/assert';
+import { error, log } from './utils/console';
+import { UnknownCommandError } from './utils/errors';
+import { call } from './utils/functions';
 
 const PORT = Number(process.env.PORT || '6378');
 const HOST = process.env.HOST || 'localhost';

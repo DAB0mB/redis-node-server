@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { assertGet, assertThrow } from 'src/assert';
+import { assertGet, assertThrow } from '~/utils/assert';
 
 type State = { [key: string]: unknown };
 

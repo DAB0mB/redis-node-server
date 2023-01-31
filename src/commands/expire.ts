@@ -1,5 +1,5 @@
-import { store } from 'src/store';
-import { kExpiresAt } from 'src/store/keys';
+import { store } from '~/store';
+import { kExpiresAt } from '~/store/keys';
 
 export const meta = {
   name: 'expire',

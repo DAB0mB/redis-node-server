@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { Message, stringifyMessage } from 'src/resp';
+import { Message, stringifyMessage } from '~/resp';
 
 type SocketListeners = { [key: string]: (...args: unknown[]) => unknown };
 

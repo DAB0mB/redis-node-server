@@ -1,6 +1,6 @@
-import { SimpleString } from 'src/resp';
-import { store } from 'src/store';
-import { kValue } from 'src/store/keys';
+import { SimpleString } from '~/resp';
+import { store } from '~/store';
+import { kValue } from '~/store/keys';
 
 export const meta = {
   name: 'set',
