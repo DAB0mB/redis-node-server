@@ -5,8 +5,8 @@ import { DataRecorder } from './data_recorder';
 import { GarbageCollector } from './garbage_collector';
 import { Store } from './store';
 
-const activityFile = process.env.ACTIVITY_FILE || resolve(process.cwd(), 'activity.log');
-const dataFile = process.env.DATA_FILE || resolve(process.cwd(), 'data.json');
+const activityFile = resolve(process.env.ACTIVITY_FILE || './activity.log');
+const dataFile = resolve(process.env.DATA_FILE || './data.json');
 const dataRecordInterval = Number(process.env.DATA_RECORD_INTERVAL || '60');
 
 export const store = new Store();

@@ -4,7 +4,7 @@ import { initStore } from './store';
 import { error, log } from './utils/console';
 
 const PORT = Number(process.env.PORT || '6378');
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || '0.0.0.0';
 
 const server = net.createServer((socket) => {
   socket.on('data', (data) => {
