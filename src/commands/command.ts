@@ -1,17 +1,26 @@
-import { CommandNotImplementedError } from '~/utils/errors';
-import * as commandDocs from './command_docs';
+import { Socket } from 'net';
+import { MessageJSON, RawMessage } from '~/resp';
 
-export const meta = {
-  name: 'command',
-  summary: 'Get array of Redis command details',
-  group: 'server',
-  complexity: 'O(N) where N is the total number of Redis commands',
+export type CommandArg = {
+  name: string,
+  type: string,
+  key_spec_index?: number,
 };
 
-export const subcommands = {
-  docs: commandDocs,
+export type CommandMeta = {
+  name: string,
+  summary: string,
+  group: string,
+  complexity: string,
+  arguments?: CommandArg[],
 };
 
-export function handler() {
-  return new CommandNotImplementedError(meta.name);
-}
+export type CommandHandler = (this: CommandsRecord, args: string[], socket: Socket) => MessageJSON | RawMessage | Promise<MessageJSON | RawMessage>;
+
+export type Command = {
+  meta: CommandMeta,
+  subcommands?: CommandsRecord,
+  handler: CommandHandler,
+};
+
+export type CommandsRecord = Record<string, Command>;
