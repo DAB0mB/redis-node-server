@@ -1,19 +1,19 @@
-export const log = (...messages: unknown[]) => {
+export const writeLog = (...messages: unknown[]) => {
   console.log(new Date(), ...messages);
 };
 
-export const warn = (...messages: unknown[]) => {
+export const writeWarn = (...messages: unknown[]) => {
   console.warn(new Date(), ...messages);
 };
 
-export const info = (...messages: unknown[]) => {
+export const writeInfo = (...messages: unknown[]) => {
   console.info(new Date(), ...messages);
 };
 
-export const debug = (...messages: unknown[]) => {
+export const writeDebug = (...messages: unknown[]) => {
   console.debug(new Date(), ...messages);
 };
 
-export const error = (...messages: unknown[]) => {
+export const writeError = (...messages: unknown[]) => {
   console.error(new Date(), ...messages);
 };

@@ -1,21 +1,27 @@
 import { Socket } from 'net';
 import { MessageJSON, RawMessage } from '~/resp';
 
-export type CommandArg = {
-  name: string,
-  type: string,
-  key_spec_index?: number,
-};
-
 export type CommandMeta = {
   name: string,
   summary: string,
   group: string,
   complexity: string,
-  arguments?: CommandArg[],
+  arguments?: CommandArgMeta[],
 };
 
-export type CommandHandler = (this: CommandsRecord, args: string[], socket: Socket) => MessageJSON | RawMessage | Promise<MessageJSON | RawMessage>;
+export type CommandArgMeta = {
+  name: string,
+  type: string,
+  key_spec_index?: number,
+};
+
+export type CommandContext = {
+  socket: Socket,
+  commands: CommandsRecord,
+};
+
+export type CommandMessage = MessageJSON | RawMessage;
+export type CommandHandler = (args: string[], context: CommandContext) => CommandMessage | Promise<CommandMessage>;
 
 export type Command = {
   meta: CommandMeta,

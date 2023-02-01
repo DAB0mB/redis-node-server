@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { error, log } from '~/utils/console';
+import { writeError, writeLog } from '~/utils/console';
 import { ActivityRecorder } from './activity_recorder';
 import { DataRecorder } from './data_recorder';
 import { GarbageCollector } from './garbage_collector';
@@ -24,7 +24,7 @@ export async function initStore() {
     }
   }
   catch (e) {
-    error('Failed to recover store data', e);
+    writeError('Failed to recover store data', e);
     process.exit(1);
   }
 
@@ -33,16 +33,16 @@ export async function initStore() {
       await activityRecorder.clear();
     }
     catch (e) {
-      error('Failed to clear activity log', e);
+      writeError('Failed to clear activity log', e);
     }
   });
 
   dataRecorder.events.on('recorded', () => {
-    log('Data recorded');
+    writeLog('Data recorded');
   });
 
   dataRecorder.events.on('record:error', (e) => {
-    error('Data record error', e);
+    writeError('Data record error', e);
   });
 
   activityRecorder.start();

@@ -1,5 +1,5 @@
+import { Command, CommandMeta, CommandsRecord } from '~/commands/command';
 import { RawMessage, stringifyMessage } from '~/resp';
-import { CommandMeta, CommandsRecord } from '~/commands/command';
 
 let docsResp: RawMessage;
 
@@ -7,19 +7,21 @@ type Doc = Omit<CommandMeta, 'name'> & {
   subcommands?: Record<string, Doc>,
 };
 
-export const meta = {
-  name: 'command|docs',
-  summary: 'Get array of specific Redis command documentation',
-  group: 'server',
-  complexity: 'O(N) where N is the number of commands to look up',
-};
+export const docs: Command = {
+  meta: {
+    name: 'command|docs',
+    summary: 'Get array of specific Redis command documentation',
+    group: 'server',
+    complexity: 'O(N) where N is the number of commands to look up',
+  },
 
-export function handler(this: CommandsRecord) {
-  if (docsResp) return docsResp;
-  const docs = commandsToDocs(this);
-  docsResp = new RawMessage(stringifyMessage(docs));
-  return docsResp;
-}
+  handler(_args, { commands }) {
+    if (docsResp) return docsResp;
+    const docs = commandsToDocs(commands);
+    docsResp = new RawMessage(stringifyMessage(docs));
+    return docsResp;
+  },
+};
 
 function commandsToDocs(commands: CommandsRecord) {
   const entries = Object.values(commands).map((command) => {

@@ -1,16 +1,16 @@
 import { Socket } from 'net';
-import { assertGet } from '~/utils/assert';
-import { error } from '~/utils/console';
-import { UnknownCommandError } from '~/utils/errors';
-import { call } from '~/utils/functions';
 import { RawMessage, parseMessage, stringifyMessage } from '~/resp';
-import { Command } from './command';
+import { assertGet } from '~/utils/assert';
+import { writeError } from '~/utils/console';
+import { UnknownCommandError } from '~/utils/errors';
+import { Command, CommandMessage } from './command';
 import { commands } from './commands';
 
 export const onCommandRequest = async (socket: Socket, data: Buffer) => {
   try {
     const localMessage = assertGet(parseMessage(data.toString()), Array);
     const args = localMessage.map(m => assertGet(m, 'string'));
+
     let subcommands = commands;
     let commandName: string;
     let command: Command;
@@ -22,7 +22,16 @@ export const onCommandRequest = async (socket: Socket, data: Buffer) => {
       }
       subcommands = command.subcommands;
     } while (subcommands && args.length);
-    const remoteMessage = await callCommand(command, args, socket);
+
+    let remoteMessage: CommandMessage;
+    try {
+      remoteMessage = await command.handler(args, { socket, commands });
+    }
+    catch (e) {
+      writeError(`Failed to handle command "${command.meta.name}"`, e);
+      throw new Error('Internal server error');
+    }
+
     if (remoteMessage instanceof RawMessage) {
       socket.write(remoteMessage.toString());
     }
@@ -34,13 +43,3 @@ export const onCommandRequest = async (socket: Socket, data: Buffer) => {
     socket.write(stringifyMessage(e));
   }
 }
-
-const callCommand = async (command: Command, args: string[], socket: Socket) => {
-  try {
-    return await call(command.handler, commands, args, socket);
-  }
-  catch (e) {
-    error(`Failed to handle command "${command.meta.name}"`, e);
-    throw new Error('Internal server error');
-  }
-};

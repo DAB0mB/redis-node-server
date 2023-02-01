@@ -1,19 +1,21 @@
-import { Socket } from 'net';
 import { messenger } from '~/messenger';
+import { Command } from '../command';
 
-export const meta = {
-  name: 'unsubscribe',
-  summary: 'Stop listening for messages posted to the given channels',
-  group: 'pubsub',
-  complexity: 'O(N) where N is the number of clients already subscribed to a channel',
-  arguments: [
-    {
-      name: 'channel',
-      type: 'string',
-    },
-  ],
+export const unsubscribe: Command = {
+  meta: {
+    name: 'unsubscribe',
+    summary: 'Stop listening for messages posted to the given channels',
+    group: 'pubsub',
+    complexity: 'O(N) where N is the number of clients already subscribed to a channel',
+    arguments: [
+      {
+        name: 'channel',
+        type: 'string',
+      },
+    ],
+  },
+
+  handler([channel], { socket }) {
+    return messenger.unsubscribe(socket, channel);
+  },
 };
-
-export function handler([channel]: string[], socket: Socket) {
-  return messenger.unsubscribe(socket, channel);
-}

@@ -1,7 +1,8 @@
 import { Socket } from 'net';
 import { Message, stringifyMessage } from '~/resp';
+import { FunctionType } from '~/utils/functions';
 
-type SocketListeners = { [key: string]: (...args: unknown[]) => unknown };
+type SocketListeners = { [key: string]: FunctionType };
 
 export class Messenger {
   private channels = new Map<string, Set<Socket>>();
