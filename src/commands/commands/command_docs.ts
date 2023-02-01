@@ -10,9 +10,9 @@ type Doc = Omit<CommandMeta, 'name'> & {
 export const docs: Command = {
   meta: {
     name: 'command|docs',
-    summary: 'Get array of specific Redis command documentation',
+    summary: 'Get array of Redis command documentations',
     group: 'server',
-    complexity: 'O(N) where N is the number of commands to look up',
+    complexity: 'O(N) where N is the total number of Redis commands',
   },
 
   handler(_args, { commands }) {

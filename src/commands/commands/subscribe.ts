@@ -4,9 +4,9 @@ import { Command } from '../command';
 export const subscribe: Command = {
   meta: {
     name: 'subscribe',
-    summary: 'Listen for messages published to the given channels',
+    summary: 'Listen for messages published to a given channel',
     group: 'pubsub',
-    complexity: 'O(N) where N is the number of channels to subscribe to',
+    complexity: 'O(1)',
     arguments: [
       {
         name: 'channel',

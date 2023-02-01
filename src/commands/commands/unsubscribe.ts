@@ -4,9 +4,9 @@ import { Command } from '../command';
 export const unsubscribe: Command = {
   meta: {
     name: 'unsubscribe',
-    summary: 'Stop listening for messages posted to the given channels',
+    summary: 'Stop listening for messages posted to a given channel',
     group: 'pubsub',
-    complexity: 'O(N) where N is the number of clients already subscribed to a channel',
+    complexity: 'O(1)',
     arguments: [
       {
         name: 'channel',

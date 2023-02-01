@@ -5,13 +5,13 @@ import { Command } from '../command';
 export const save: Command = {
   meta: {
     name: 'save',
-    summary: 'Save the dataset to disk',
+    summary: 'Asynchronously save the datastore to disk',
     group: 'server',
-    complexity: 'O(N) where N is the total number of keys in all databases',
+    complexity: 'O(1)',
   },
 
-  async handler() {
-    await dataRecorder.save();
+  handler() {
+    dataRecorder.save();
     return new SimpleString('OK');
   },
 };

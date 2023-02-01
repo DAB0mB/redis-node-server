@@ -46,12 +46,12 @@ The persistency behavior can be modified via environment variables, amongst othe
 - **DATA_FILE** - Defaults to `/data/data.jsonl`.
 - **DATA_RECORD_INTERVAL** - Defaults to `60` seconds.
 
-To start the server you can run `npm start`, or you can use a Docker command:
+To start the server you can run `npm start`, or you can run a Docker container:
 
 ```sh
 docker run \
   -p 6378:6378 \
-  -v "$(pwd)"./data:/data \
+  -v "$(pwd)"/data:/data \
   --name redis-node-server \
   redis-node-server
 ```
