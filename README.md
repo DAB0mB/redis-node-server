@@ -1,6 +1,6 @@
 # Redis Node Server
 
-This is a Redis implementation in pure Javascript that was built with readabiliy and extensibility in mind. It offers the following:
+This is a Redis implementation in pure Javascript that was built with readabiliy and extensibility in mind. Currently, it offers the following:
 
 - Data storage
 - Data expiry and garbage collection
@@ -15,6 +15,7 @@ redis.cli -p 3478
 
 Supported commands follow the original Redis specs, but they are limited:
 
+- [bgsave](./src/commands/commands/bgsave.ts)
 - [command](./src/commands/commands/command.ts)
 - [command|docs](./src/commands/commands/command_docs.ts)
 - [del](./src/commands/commands/del.ts)
@@ -22,13 +23,12 @@ Supported commands follow the original Redis specs, but they are limited:
 - [get](./src/commands/commands/get.ts)
 - [persist](./src/commands/commands/persist.ts)
 - [publish](./src/commands/commands/publish.ts)
-- [save](./src/commands/commands/save.ts)
 - [set](./src/commands/commands/set.ts)
 - [subscribe](./src/commands/commands/subscribe.ts)
 - [ttl](./src/commands/commands/ttl.ts)
 - [unsubscribe](./src/commands/commands/unsubscribe.ts)
 
-Adding new commands is easy, all you have to do is implement the [Command](./src/commands/command.ts) interface.
+Adding a new command is easy, all you have to do is implement the [Command](./src/commands/command.ts) interface.
 
 The presented persistency mechanism is inspired by the original one, although it's slightly different. It's designed to be simpler and "just work" right out of the gate:
 
