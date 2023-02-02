@@ -6,7 +6,7 @@ import { UnknownCommandError } from '~/utils/errors';
 import { Command, CommandMessage } from './command';
 import { commands } from './commands';
 
-export const onCommandRequest = async (socket: Socket, data: Buffer) => {
+export async function onCommandRequest(socket: Socket, data: Buffer) {
   try {
     const localMessage = assertGet(parseMessage(data.toString()), Array);
     const args = localMessage.map(m => assertGet(m, 'string'));

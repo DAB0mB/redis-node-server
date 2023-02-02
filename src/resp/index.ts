@@ -5,7 +5,7 @@ const LF = '\n';
 const CRLF = `${CR}${LF}`;
 
 export type Message = string | number | SimpleError | SimpleString | Message[];
-export type MessageJSON = string | number | boolean | SimpleError | SimpleString | MessageJSON[] | { [key: string]: MessageJSON };
+export type MessageJSON = string | number | boolean | Error | SimpleString | MessageJSON[] | { [key: string]: MessageJSON };
 export type MessageText = string | RawMessage;
 
 class MessageParser {
@@ -88,7 +88,7 @@ class MessageStringifier {
     if (message instanceof Array) {
       return this.stringifyArray(message);
     }
-    if (message instanceof SimpleError) {
+    if (message instanceof Error) {
       return this.stringifyError(message);
     }
     if (message instanceof SimpleString) {
