@@ -1,6 +1,6 @@
 # Redis Node Server
 
-This is a Redis implementation in pure Javascript that was built with readabiliy and extensibility in mind. Currently, it offers the following:
+This is a Redis implementation in pure Javascript that was built with readability and extensibility in mind. Currently, it offers the following:
 
 - Data storage
 - Data expiry and garbage collection
